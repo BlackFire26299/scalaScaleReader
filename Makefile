@@ -1,5 +1,7 @@
+SHELL=/bin/bash
+
 compile:
-	@cc src/main.cc -o main -lstdc++
+	@g++ src/main.cc -o main $$(pkg-config --cflags --libs gtk4)
 
 clean:
 	@rm -f main
