@@ -8,12 +8,12 @@ It's super cool but the original program is old lol.
 ## How to install:
 clone the git repository and esure you have g++, make, pkg-config, and gtk4 downloaded (only tested on linux I do not know if it will work on windows).
 arch linux commands are:
--`sudo pacman -S base-devel` (installs g++, pkg-config and make)
--`sudo pacman -S gtk4` (installs gtk4)
+- `sudo pacman -S base-devel` (installs g++, pkg-config and make)
+- `sudo pacman -S gtk4` (installs gtk4)
 
 ## How to run:
-1.run `make` in the terminal to compile the project
-2.run `./main` to run the project
+1. run `make` in the terminal to compile the project
+2. run `./main` to run the project
 
 
 
