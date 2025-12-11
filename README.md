@@ -32,4 +32,4 @@ run `make clean`
 # project not finished yet 
 
 
-# V 0.0.2
+# V 0.1.0
