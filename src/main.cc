@@ -32,26 +32,42 @@ static void start_scale (GtkWidget *widget, gpointer data)
 {
 	g_print("Starting scale... \n");
 	NoteIntervalArray* nia = (NoteIntervalArray*)data;
+	std::vector<double> frequencies;
+	frequencies.push_back(nia->frequency);
+	double newfreq = nia->frequency;
 	for(int i = 0; i<nia->size; i++){
-		std::cout << nia->NoteInterval[i] << std::endl;
+		
+		newfreq = nia->frequency * nia->NoteInterval[i];
+		frequencies.push_back(newfreq);
+		std::cout << i << ". : "<<nia->NoteInterval[i] << " : " << newfreq << std::endl;
 	}
-	std::vector<std::int16_t> samples = {440};
 	
-	constexpr std::size_t SAMPLES = 44100;
+	
+	
+
+
+
+	std::size_t samplesPerCycle = 44100;
+	std::size_t SAMPLES = samplesPerCycle*frequencies.size();
 	constexpr std::size_t SAMPLE_RATE = 44100;
 
 	std::vector<std::int16_t> raw(SAMPLES); // using an std::vector keeps this large resource off the stack and stores it in the heap
 
-	constexpr std::int16_t AMPLITUDE = 10000;
+	constexpr std::int16_t AMPLITUDE = 5000;
 	constexpr double TWO_PI = 6.28318;
-	double increment = nia->frequency / 44100.0;
+	double increment = frequencies.front() / 44100.0;
 	double x = 0.0;
-	for (std::size_t i = 0; i < SAMPLES; ++i)
-	{
-		raw[i] = static_cast<std::int16_t>(AMPLITUDE * sin(x * TWO_PI));
-		x += increment;
+	std::cout << SAMPLES << std::endl;
+	for (std::size_t j = 0; j<frequencies.size(); j++){
+		increment = frequencies.at(j) / 44100.0;
+		for (std::size_t i = 0; i < samplesPerCycle; ++i)
+		{
+			
+			raw.at((size_t)(j*44100+i)) = static_cast<std::int16_t>(AMPLITUDE * sin(x * TWO_PI));
+			x += increment;
+		}
+		x = 0.0;
 	}
-
 	sf::SoundBuffer buffer{};
 	if (!buffer.loadFromSamples(raw.data(), raw.size(), 1, SAMPLE_RATE, { sf::SoundChannel::Mono }))
 	{
@@ -60,12 +76,13 @@ static void start_scale (GtkWidget *widget, gpointer data)
 	}
 
 	sf::Sound sound(buffer);
-	sound.setLooping(true);
 	sound.play();
 	while (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) // we can quit by holding Escape
 	{
 		sf::sleep(sf::milliseconds(100));
 	}
+	sound.stop();
+	
     
 }
 
