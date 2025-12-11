@@ -25,9 +25,9 @@ typedef struct {
 static void start_scale (GtkWidget *widget, gpointer data)
 {
 	g_print("Starting scale... \n");
-	NoteIntervalArray nia = (NoteIntervalArray)data;
-	for(int i = 0; i<nia.size; i++){
-		std::cout << nia.NoteInterval[i] << std::endl;
+	NoteIntervalArray* nia = (NoteIntervalArray*)data;
+	for(int i = 0; i<nia->size; i++){
+		std::cout << nia->NoteInterval[i] << std::endl;
 	}
 }
 
@@ -174,22 +174,20 @@ int main(int argc, char **argv){
 	string response;
 	std::cin >> response;
 	freq startFrequency = std::stod(reduce(response));
-	double NoteInterval[NumNotes];
-	std::copy(std::begin(NoteIntervals), std::end(NoteIntervals),std::begin(NoteInterval));	
 	NoteIntervalArray nia = {0};
-	nia.NoteInterval = NoteInterval;
+	nia.NoteInterval = NoteIntervals;
 	nia.size = NumNotes;
-	
+	NoteIntervalArray* pnia = &nia;	
 
-    	free(NoteIntervals);
+    
 	
-    	GtkApplication *app;
+    GtkApplication *app;
 	int status;
 	
 	app = gtk_application_new ("org.gtk.example", G_APPLICATION_DEFAULT_FLAGS);
-	g_signal_connect (app, "activate", G_CALLBACK (activate), (gpointer)nia);
+	g_signal_connect(app, "activate", G_CALLBACK (activate), (gpointer)pnia);
 	status = g_application_run (G_APPLICATION (app), argc, argv);
 	g_object_unref (app);
-
+	free(NoteIntervals);
 	return status;    
 }
