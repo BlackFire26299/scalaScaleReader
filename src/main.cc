@@ -12,7 +12,6 @@
 #include <math.h>
 #include <gtk/gtk.h>
 #include <SFML/Audio.hpp>
-#include <SFML/Window/Keyboard.hpp>
 #include <vector>
 
 
@@ -77,11 +76,11 @@ static void start_scale (GtkWidget *widget, gpointer data)
 
 	sf::Sound sound(buffer);
 	sound.play();
-	while (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) // we can quit by holding Escape
+	while (sound.getStatus() == sf::SoundSource::Status::Playing)
 	{
 		sf::sleep(sf::milliseconds(100));
 	}
-	sound.stop();
+	
 	
     
 }
