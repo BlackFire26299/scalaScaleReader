@@ -6,10 +6,11 @@ It's super cool but the original program is old lol.
 
 # How to:
 ## How to install:
-clone the git repository and esure you have g++, make, pkg-config, and gtk4 downloaded (only tested on linux I do not know if it will work on windows).
+clone the git repository and esure you have g++, make, sfml, pkg-config, and gtk4 downloaded (only tested on linux I do not know if it will work on windows).
 arch linux commands are:
 - `sudo pacman -S base-devel` (installs g++, pkg-config and make)
 - `sudo pacman -S gtk4` (installs gtk4)
+- `sudo pacman -S sfml` (installs sfml)
 
 ## How to run:
 1. run `make` in the terminal to compile the project

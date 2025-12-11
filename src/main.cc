@@ -11,6 +11,10 @@
 #include <stdbool.h>
 #include <math.h>
 #include <gtk/gtk.h>
+#include <SFML/Audio.hpp>
+#include <SFML/Window/Keyboard.hpp>
+#include <vector>
+
 
 typedef std::string string;
 typedef double cents;
@@ -19,6 +23,8 @@ typedef double interval;
 typedef struct {
 	double* NoteInterval;
 	int size;
+	double frequency;
+
 } NoteIntervalArray;
 	
 
@@ -29,6 +35,38 @@ static void start_scale (GtkWidget *widget, gpointer data)
 	for(int i = 0; i<nia->size; i++){
 		std::cout << nia->NoteInterval[i] << std::endl;
 	}
+	std::vector<std::int16_t> samples = {440};
+	
+	constexpr std::size_t SAMPLES = 44100;
+	constexpr std::size_t SAMPLE_RATE = 44100;
+
+	std::vector<std::int16_t> raw(SAMPLES); // using an std::vector keeps this large resource off the stack and stores it in the heap
+
+	constexpr std::int16_t AMPLITUDE = 10000;
+	constexpr double TWO_PI = 6.28318;
+	double increment = nia->frequency / 44100.0;
+	double x = 0.0;
+	for (std::size_t i = 0; i < SAMPLES; ++i)
+	{
+		raw[i] = static_cast<std::int16_t>(AMPLITUDE * sin(x * TWO_PI));
+		x += increment;
+	}
+
+	sf::SoundBuffer buffer{};
+	if (!buffer.loadFromSamples(raw.data(), raw.size(), 1, SAMPLE_RATE, { sf::SoundChannel::Mono }))
+	{
+		std::cerr << "Loading failed!" << std::endl;
+		
+	}
+
+	sf::Sound sound(buffer);
+	sound.setLooping(true);
+	sound.play();
+	while (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) // we can quit by holding Escape
+	{
+		sf::sleep(sf::milliseconds(100));
+	}
+    
 }
 
 static void
@@ -177,6 +215,7 @@ int main(int argc, char **argv){
 	NoteIntervalArray nia = {0};
 	nia.NoteInterval = NoteIntervals;
 	nia.size = NumNotes;
+	nia.frequency = startFrequency;
 	NoteIntervalArray* pnia = &nia;	
 
     
