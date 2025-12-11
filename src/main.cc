@@ -16,11 +16,19 @@ typedef std::string string;
 typedef double cents;
 typedef double freq;
 typedef double interval;
+typedef struct {
+	double* NoteInterval;
+	int size;
+} NoteIntervalArray;
+	
 
-static void
-print_hello (GtkWidget *widget, gpointer   data)
+static void start_scale (GtkWidget *widget, gpointer data)
 {
-	g_print ("Hello World\n");
+	g_print("Starting scale... \n");
+	NoteIntervalArray nia = (NoteIntervalArray)data;
+	for(int i = 0; i<nia.size; i++){
+		std::cout << nia.NoteInterval[i] << std::endl;
+	}
 }
 
 static void
@@ -28,15 +36,15 @@ activate (GtkApplication *app, gpointer user_data)
 {
   	GtkWidget *window;
   	GtkWidget *button;
-
+	
   	window = gtk_application_window_new (app);
   	gtk_window_set_title (GTK_WINDOW (window), "Hello");
   	gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
 	
-	button = gtk_button_new_with_label ("Hello World");
+	button = gtk_button_new_with_label ("Start Scale");
   	gtk_widget_set_halign(button, GTK_ALIGN_CENTER);
   	gtk_widget_set_valign(button, GTK_ALIGN_CENTER);
-  	g_signal_connect (button, "clicked", G_CALLBACK (print_hello), NULL);
+  	g_signal_connect (button, "clicked", G_CALLBACK (start_scale), user_data);
   	gtk_window_set_child (GTK_WINDOW (window), button);
 
   	gtk_window_present (GTK_WINDOW (window));
@@ -158,28 +166,30 @@ double* GetScaleData(string& ScaleName, int& NumNotes ){
 	
 int main(int argc, char **argv){
 	    
-	    string ScaleName;
-	    int NumNotes;
-	    double* NoteIntervals = GetScaleData(ScaleName, NumNotes);
+	string ScaleName;
+	int NumNotes;
+	double* NoteIntervals = GetScaleData(ScaleName, NumNotes);
 	    
-	    std::cout << "Enter a starting frequency"<<std::endl;
-	    string response;
-	    std::cin >> response;
-	    freq startFrequency = std::stod(reduce(response));
-	    
-		
+	std::cout << "Enter a starting frequency"<<std::endl;
+	string response;
+	std::cin >> response;
+	freq startFrequency = std::stod(reduce(response));
+	double NoteInterval[NumNotes];
+	std::copy(std::begin(NoteIntervals), std::end(NoteIntervals),std::begin(NoteInterval));	
+	NoteIntervalArray nia = {0};
+	nia.NoteInterval = NoteInterval;
+	nia.size = NumNotes;
 	
 
-    	    free(NoteIntervals);
-    	    GtkApplication *app;
-	    int status;
+    	free(NoteIntervals);
 	
-	    app = gtk_application_new ("org.gtk.example", G_APPLICATION_DEFAULT_FLAGS);
-	    g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
-	    status = g_application_run (G_APPLICATION (app), argc, argv);
-	    g_object_unref (app);
+    	GtkApplication *app;
+	int status;
+	
+	app = gtk_application_new ("org.gtk.example", G_APPLICATION_DEFAULT_FLAGS);
+	g_signal_connect (app, "activate", G_CALLBACK (activate), (gpointer)nia);
+	status = g_application_run (G_APPLICATION (app), argc, argv);
+	g_object_unref (app);
 
-	    return status;
-
-    
+	return status;    
 }
