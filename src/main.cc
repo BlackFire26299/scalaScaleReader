@@ -11,7 +11,9 @@
 #include <stdbool.h>
 #include <math.h>
 #include <gtk/gtk.h>
-#include <SFML/Audio.hpp>
+#include <SFML/Audio/Sound.hpp>
+#include <SFML/Audio/SoundBuffer.hpp>
+#include <SFML/System/Sleep.hpp>
 #include <vector>
 
 
@@ -25,7 +27,8 @@ typedef struct {
 	double frequency;
 
 } NoteIntervalArray;
-	
+
+string Filename;
 
 static void start_scale (GtkWidget *widget, gpointer data)
 {
@@ -34,11 +37,12 @@ static void start_scale (GtkWidget *widget, gpointer data)
 	std::vector<double> frequencies;
 	frequencies.push_back(nia->frequency);
 	double newfreq = nia->frequency;
+	std::cout << 1 << ". : "<<newfreq << " : " << newfreq << std::endl;
 	for(int i = 0; i<nia->size; i++){
 		
 		newfreq = nia->frequency * nia->NoteInterval[i];
 		frequencies.push_back(newfreq);
-		std::cout << i << ". : "<<nia->NoteInterval[i] << " : " << newfreq << std::endl;
+		std::cout << i+1 << ". : "<<nia->NoteInterval[i] << " : " << newfreq << std::endl;
 	}
 	
 	
@@ -50,7 +54,7 @@ static void start_scale (GtkWidget *widget, gpointer data)
 	std::size_t SAMPLES = samplesPerCycle*frequencies.size();
 	constexpr std::size_t SAMPLE_RATE = 44100;
 
-	std::vector<std::int16_t> raw(SAMPLES); // using an std::vector keeps this large resource off the stack and stores it in the heap
+	std::vector<std::int16_t> raw(SAMPLES);
 
 	constexpr std::int16_t AMPLITUDE = 5000;
 	constexpr double TWO_PI = 6.28318;
@@ -85,21 +89,68 @@ static void start_scale (GtkWidget *widget, gpointer data)
     
 }
 
+static void on_open_response(GtkDialog *dialog, int response) {
+    if (response == GTK_RESPONSE_ACCEPT) {
+        GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+        GFile *file = gtk_file_chooser_get_file(chooser);
+        Filename = g_file_get_parse_name(file);
+		std::cout << Filename << std::endl;
+		
+    }
+    gtk_window_destroy(GTK_WINDOW(dialog));
+}
+
+
+static void choose_file(GtkWidget *button, gpointer data){
+
+	GtkWidget *dialog;
+GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+
+dialog = gtk_file_chooser_dialog_new("Open File", (GtkWindow*)data, action,
+                              "_Cancel", GTK_RESPONSE_CANCEL,
+                              "_Open", GTK_RESPONSE_ACCEPT, NULL);
+
+gtk_window_present(GTK_WINDOW(dialog));
+
+g_signal_connect(dialog, "response", G_CALLBACK(on_open_response), NULL);
+
+	
+
+    
+
+}
 static void
 activate (GtkApplication *app, gpointer user_data)
 {
   	GtkWidget *window;
   	GtkWidget *button;
+	GtkWidget *chooseFileButton;
+	GtkWidget *grid = gtk_grid_new();
+
+	
 	
   	window = gtk_application_window_new (app);
-  	gtk_window_set_title (GTK_WINDOW (window), "Hello");
-  	gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+  	gtk_window_set_title (GTK_WINDOW (window), "Scala Scale reader");
+  	gtk_window_set_default_size (GTK_WINDOW (window), 500, 500);
 	
 	button = gtk_button_new_with_label ("Start Scale");
   	gtk_widget_set_halign(button, GTK_ALIGN_CENTER);
   	gtk_widget_set_valign(button, GTK_ALIGN_CENTER);
+	gtk_grid_attach(GTK_GRID(grid), button, 0, 0, 1,1);
+	//gtk_window_set_child (GTK_WINDOW (window), button);
   	g_signal_connect (button, "clicked", G_CALLBACK (start_scale), user_data);
+
+	
   	gtk_window_set_child (GTK_WINDOW (window), button);
+	chooseFileButton = gtk_button_new_with_label ("Choose file");
+  	gtk_widget_set_halign(chooseFileButton, GTK_ALIGN_CENTER);
+  	gtk_widget_set_valign(chooseFileButton, GTK_ALIGN_CENTER);
+	gtk_grid_attach(GTK_GRID(grid), button, 0, 1, 1,1);
+	//gtk_window_set_child (GTK_WINDOW (window), chooseFileButton);
+	g_signal_connect (chooseFileButton, "clicked", G_CALLBACK (choose_file), (gpointer)window);
+	gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+	gtk_grid_set_column_homogeneous(GTK_GRID(grid), TRUE);
+	gtk_window_set_child(GTK_WINDOW(window), grid);
 
   	gtk_window_present (GTK_WINDOW (window));
 }
@@ -192,7 +243,7 @@ double* GetScaleData(string& ScaleName, int& NumNotes ){
     	        continue;
     	    }
     	    tempString = reduce(tempString);
-    	    
+    	    std::cout << tempString << std::endl;
     	    if (tempString.find(".") != string::npos){
     	        i[NoteIntervals] = centsToRatio(std::stod(tempString));
     	    }else{
@@ -205,9 +256,8 @@ double* GetScaleData(string& ScaleName, int& NumNotes ){
     	        newstring[1] = t;
     	        i[NoteIntervals] = std::stod(newstring[0])/std::stod(newstring[1]);
     	    }
-    	    
     	    i++;
-    	    if (i == NumNotes-1){
+    	    if (i == NumNotes){
     	        break;
     	    }
     	}
