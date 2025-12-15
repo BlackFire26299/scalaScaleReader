@@ -143,9 +143,9 @@ activate (GtkApplication *app, gpointer user_data)
 	
   	gtk_window_set_child (GTK_WINDOW (window), button);
 	chooseFileButton = gtk_button_new_with_label ("Choose file");
-  	gtk_widget_set_halign(chooseFileButton, GTK_ALIGN_CENTER);
-  	gtk_widget_set_valign(chooseFileButton, GTK_ALIGN_CENTER);
-	gtk_grid_attach(GTK_GRID(grid), button, 0, 1, 1,1);
+	gtk_widget_set_halign(chooseFileButton, GTK_ALIGN_CENTER);
+	gtk_widget_set_valign(chooseFileButton, GTK_ALIGN_CENTER);
+	gtk_grid_attach(GTK_GRID(grid), chooseFileButton, 0, 1, 1,1);
 	//gtk_window_set_child (GTK_WINDOW (window), chooseFileButton);
 	g_signal_connect (chooseFileButton, "clicked", G_CALLBACK (choose_file), (gpointer)window);
 	gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
@@ -244,18 +244,18 @@ double* GetScaleData(string& ScaleName, int& NumNotes ){
     	    }
     	    tempString = reduce(tempString);
     	    std::cout << tempString << std::endl;
-    	    if (tempString.find(".") != string::npos){
-    	        i[NoteIntervals] = centsToRatio(std::stod(tempString));
-    	    }else{
-    	        std::stringstream ss(tempString);
-    	        string t;
-    	        string newstring[2];
-    	        std::getline(ss, t, '/');
-    	        newstring[0] = t;
-    	        std::getline(ss, t, '/');
-    	        newstring[1] = t;
-    	        i[NoteIntervals] = std::stod(newstring[0])/std::stod(newstring[1]);
-    	    }
+			if (tempString.find(".") != string::npos){
+				NoteIntervals[i] = centsToRatio(std::stod(tempString));
+			}else{
+				std::stringstream ss(tempString);
+				string t;
+				string newstring[2];
+				std::getline(ss, t, '/');
+				newstring[0] = t;
+				std::getline(ss, t, '/');
+				newstring[1] = t;
+				NoteIntervals[i] = std::stod(newstring[0])/std::stod(newstring[1]);
+			}
     	    i++;
     	    if (i == NumNotes){
     	        break;
